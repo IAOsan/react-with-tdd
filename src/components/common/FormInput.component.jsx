@@ -1,21 +1,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { getClasName } from '../../constants/utils';
 
-function FormInput({ error, customGroupClass, customInputClass, ...rest }) {
-	const groupClassname = customGroupClass || 'form__group';
-	const inputClassname = customInputClass || 'form__control';
-
-	function renderInput({ type, ...rest }) {
-		if (type === 'textarea') return <textarea {...rest}></textarea>;
-		return <input type={type} {...rest} />;
-	}
+function FormInput({
+	id,
+	label,
+	error,
+	customGroupClass,
+	customInputClass,
+	...rest
+}) {
+	const groupClassname = getClasName(
+		{ [customGroupClass]: !!customGroupClass },
+		{ 'form-group': !customGroupClass }
+	);
+	const inputClassname = getClasName(
+		{ [customInputClass]: !!customInputClass },
+		{ 'form-control': !customInputClass },
+		{ 'is-invalid': !!error }
+	);
 
 	return (
 		<div className={groupClassname}>
-			{renderInput({ ...rest, className: inputClassname })}
-			{error && (
-				<small className='text-danger mx-8 d-block'>{error}</small>
-			)}
+			{label && <label htmlFor={id}>{label}</label>}
+			<input id={id} className={inputClassname} {...rest} />
+			{error && <p className='invalid-feedback'>{error}</p>}
 		</div>
 	);
 }
@@ -24,6 +33,7 @@ FormInput.propTypes = {
 	type: PropTypes.string,
 	name: PropTypes.string.isRequired,
 	id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+	label: PropTypes.string,
 	placeholder: PropTypes.string,
 	value: PropTypes.string,
 	error: PropTypes.string,

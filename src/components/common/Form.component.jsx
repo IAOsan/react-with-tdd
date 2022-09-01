@@ -1,8 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import FormInput from './FormInput.component';
-import Spinner from './Spinner/Spinner.component';
 import PropTypes from 'prop-types';
+import { getClasName } from '../../constants/utils';
 
 function Form({
 	title,
@@ -15,33 +14,42 @@ function Form({
 	isLoading,
 	customFormClass,
 }) {
-	const formClassname = customFormClass || 'form';
+	const formClassname = getClasName(
+		{ [customFormClass]: !!customFormClass },
+		{ 'card border-secondary': !customFormClass }
+	);
 
 	return (
 		<form onSubmit={onSubmit} className={formClassname}>
-			{title && (
-				<h2 className='heading-2 mb-24 text-primary-alt'>{title}</h2>
-			)}
-			{fields.map((f, idx) => (
-				<FormInput key={idx} {...f} />
-			))}
-			<button
-				className='btn btn--default btn--primary btn--block my-20'
-				type='submit'
-				disabled={disableSubmit}
-			>
-				<div className='flex flex-ai-c flex-jc-c'>
-					{isLoading && <Spinner size='xs' color='light' inline />}
+			{title && <h2 className='card-header'>{title}</h2>}
+
+			<div className='card-body'>
+				{fields.map((f, idx) => (
+					<FormInput key={f.id || idx} {...f} />
+				))}
+				<button
+					className='btn btn-primary btn-lg d-block w-100'
+					type='submit'
+					disabled={disableSubmit}
+				>
+					{isLoading && (
+						<span
+							className='spinner-border spinner-border-sm mr-2'
+							role='status'
+							aria-hidden='true'
+						></span>
+					)}
 					{submitLabel}
-				</div>
-			</button>
+				</button>
+			</div>
+
 			{content && content()}
 			{action && (
 				<p className='mt-20 text-center'>
 					{action.desc}
-					<Link to={action.path} className='mx-8 text-underline'>
+					<a href={action.path} className='mx-8 text-underline'>
 						{action.label}
-					</Link>
+					</a>
 				</p>
 			)}
 		</form>

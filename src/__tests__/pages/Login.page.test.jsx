@@ -1,6 +1,11 @@
-import '../setupTestServer';
+import { mswServer } from '../setupTestServer';
 import { render, setupUser, waitFor } from '../test-utils';
-import { requestTracker } from '../testServerHandlers';
+import {
+	failureEmailPostUser,
+	failurePasswordPostUser,
+	failureUsernamePostUser,
+	requestTracker,
+} from '../testServerHandlers';
 import LoginPage from '../../pages/Login.page';
 
 const user = setupUser();
@@ -68,14 +73,16 @@ describe('<LoginPage />', () => {
 	});
 
 	describe('interactions', () => {
-		const fillForm = async () => {
-			await user.type(inputName, userCredentials.username);
-			await user.type(inputEmail, userCredentials.email);
-			await user.type(inputPassword, userCredentials.password);
-			await user.type(
-				inputConfirmPassword,
-				userCredentials.confirmPassword
-			);
+		const fillForm = async (values) => {
+			const credentials = {
+				...userCredentials,
+				...values,
+			};
+
+			await user.type(inputName, credentials.username);
+			await user.type(inputEmail, credentials.email);
+			await user.type(inputPassword, credentials.password);
+			await user.type(inputConfirmPassword, credentials.confirmPassword);
 		};
 
 		it('should submit button be enabled if password and confirmPassword inputs have the same value', async () => {
@@ -130,6 +137,105 @@ describe('<LoginPage />', () => {
 			await waitFor(() => {
 				expect(document.querySelector('form')).not.toBeInTheDocument();
 			});
+		});
+
+		it('should display validation errors for username', async () => {
+			mswServer.use(failureUsernamePostUser);
+
+			await fillForm({
+				username: ' ',
+			});
+			await user.click(submitButton);
+
+			expect(
+				wrapper.getByText('Must have min 4 and max 32 characters')
+			).toBeInTheDocument();
+		});
+
+		it('should hides spinner and enable submit button after request finished', async () => {
+			mswServer.use(failureUsernamePostUser);
+
+			await fillForm({
+				username: ' ',
+			});
+			await user.click(submitButton);
+
+			expect(
+				document.querySelector('.spinner-border')
+			).not.toBeInTheDocument();
+			expect(submitButton).toBeEnabled();
+		});
+
+		it('should display validation errors for email', async () => {
+			mswServer.use(failureEmailPostUser);
+
+			await fillForm({
+				email: 'someEmail@mail',
+			});
+			await user.click(submitButton);
+
+			expect(
+				wrapper.getByText('E-mail is not valid')
+			).toBeInTheDocument();
+		});
+
+		it('should display validation errors for password', async () => {
+			mswServer.use(failurePasswordPostUser);
+
+			await fillForm();
+			await user.click(submitButton);
+
+			expect(
+				wrapper.getByText('Password must be at least 6 characters')
+			).toBeInTheDocument();
+		});
+
+		it('should display validation errors for password', async () => {
+			await fillForm({
+				password: 'hello world',
+				confirmPassword: 'hello',
+			});
+			await user.click(submitButton);
+
+			expect(wrapper.getByText('Password mismatch')).toBeInTheDocument();
+		});
+
+		it('should clear validation error when change username input', async () => {
+			mswServer.use(failureUsernamePostUser);
+
+			await fillForm({
+				username: 'ba',
+			});
+			await user.click(submitButton);
+			await user.type(inputName, 'tman');
+
+			expect(
+				wrapper.queryByText('Must have min 4 and max 32 characters')
+			).toBeNull();
+		});
+
+		it('should clear validation error when change email input', async () => {
+			mswServer.use(failureEmailPostUser);
+
+			await fillForm({
+				email: 'someEmail@mail',
+			});
+			await user.click(submitButton);
+			await user.type(inputEmail, '.com');
+
+			expect(wrapper.queryByText('E-mail is not valid')).toBeNull();
+		});
+
+		it('should clear validation error when change password input', async () => {
+			mswServer.use(failurePasswordPostUser);
+
+			await fillForm();
+			await user.click(submitButton);
+			await user.type(inputPassword, 'Updated1');
+
+			expect(
+				wrapper.queryByText('Password must be at least 6 characters')
+			).toBeNull();
 		});
 	});
 });

@@ -1,42 +1,57 @@
 import React, { useState } from 'react';
+import Form from '../components/common/Form.component';
+import useForm from '../hooks/useForm';
 
 export function LoginPage() {
-	const [isSuccessful, setIsSuccessful] = useState(false);
-	const [isLoading, setIsLoading] = useState(false);
-	const [values, setValues] = useState({
+	const formSchema = {
 		username: '',
 		email: '',
 		password: '',
 		confirmPassword: '',
-	});
+	};
+	const {
+		formData: values,
+		errors,
+		setErrors,
+		handleSubmit,
+		handleChange,
+	} = useForm(formSchema, null, doSubmit);
+	const [isSuccessful, setIsSuccessful] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 	const someInputsAreEmpty = Object.keys(values).some((k) => !values[k]);
-	const passwordsMatch = values.password !== values.confirmPassword;
-	const isSubmitDisabled = isLoading || someInputsAreEmpty || passwordsMatch;
+	const passwordsNotMatch = values.password !== values.confirmPassword;
+	const isSubmitDisabled =
+		isLoading || someInputsAreEmpty || passwordsNotMatch;
 
-	function handleChange({ target }) {
-		setValues((prevState) => ({
-			...prevState,
-			[target.name]: target.value,
-		}));
-	}
-
-	async function handleSubmit(e) {
-		e.preventDefault();
+	async function doSubmit() {
 		const base_url = window.location.origin;
 		const url = new URL('/api/1.0/users', base_url);
 
 		setIsLoading(true);
 		try {
-			await fetch(url, {
+			const res = await fetch(url, {
 				method: 'POST',
 				body: JSON.stringify(values),
 				headers: {
 					'Content-Type': 'application/json',
 				},
 			});
+			if (!res.ok) {
+				const data = await res.json();
+				const error = new Error(res.statusText);
+				error.status = res.status;
+				error.validationErrors = data?.validationErrors;
+				throw error;
+			}
 			setIsSuccessful(true);
 		} catch (error) {
-			console.log('oops', error);
+			if (error.status >= 400 && error.status < 500) {
+				setErrors(error.validationErrors);
+				return;
+			}
+			console.error('oops: ', error.message);
+		} finally {
+			setIsLoading(false);
 		}
 	}
 
@@ -45,78 +60,55 @@ export function LoginPage() {
 			<div className='row justify-content-center py-5'>
 				<div className='col-lg-5 col-md-7 col-sm-8'>
 					{!isSuccessful ? (
-						<form
-							onSubmit={handleSubmit}
-							className='card border-secondary'
-						>
-							<h2 className='card-header'>Sign up</h2>
-							<div className='card-body'>
-								<div className='form-group'>
-									<label htmlFor='inputUsername'>
-										Username
-									</label>
-									<input
-										type='text'
-										name='username'
-										id='inputUsername'
-										value={values.username}
-										onChange={handleChange}
-										className='form-control'
-									/>
-								</div>
-								<div className='form-group'>
-									<label htmlFor='inputEmail'>Email</label>
-									<input
-										type='email'
-										name='email'
-										id='inputEmail'
-										value={values.email}
-										onChange={handleChange}
-										className='form-control'
-									/>
-								</div>
-								<div className='form-group'>
-									<label htmlFor='inputPassword'>
-										Password
-									</label>
-									<input
-										type='password'
-										name='password'
-										id='inputPassword'
-										value={values.password}
-										onChange={handleChange}
-										className='form-control'
-									/>
-								</div>
-								<div className='form-group'>
-									<label htmlFor='inputConfirmPassword'>
-										Confirm Password
-									</label>
-									<input
-										type='password'
-										name='confirmPassword'
-										id='inputConfirmPassword'
-										value={values.confirmPassword}
-										onChange={handleChange}
-										className='form-control'
-									/>
-								</div>
-								<button
-									className='btn btn-primary btn-lg d-block w-100'
-									type='submit'
-									disabled={isSubmitDisabled}
-								>
-									{isLoading && (
-										<span
-											className='spinner-border spinner-border-sm mr-2'
-											role='status'
-											aria-hidden='true'
-										></span>
-									)}
-									Sign up
-								</button>
-							</div>
-						</form>
+						<>
+							<Form
+								title='Sign up'
+								fields={[
+									{
+										id: 'inputUsername',
+										label: 'Username',
+										type: 'text',
+										name: 'username',
+										value: values.username,
+										onChange: handleChange,
+										error: errors?.username,
+									},
+									{
+										id: 'inputEmail',
+										label: 'Email',
+										type: 'email',
+										name: 'email',
+										value: values.email,
+										onChange: handleChange,
+										error: errors?.email,
+									},
+									{
+										id: 'inputPassword',
+										label: 'Password',
+										type: 'password',
+										name: 'password',
+										value: values.password,
+										onChange: handleChange,
+										error: errors?.password,
+									},
+									{
+										id: 'inputConfirmPassword',
+										label: 'Confirm Password',
+										type: 'password',
+										name: 'confirmPassword',
+										value: values.confirmPassword,
+										onChange: handleChange,
+										error: passwordsNotMatch
+											? 'Password mismatch'
+											: '',
+									},
+								]}
+								submitLabel='Sign up'
+								disableSubmit={isSubmitDisabled}
+								onSubmit={handleSubmit}
+								isLoading={isLoading}
+							/>
+						</>
 					) : (
 						<div
 							className='alert alert-success fade show mt-5'

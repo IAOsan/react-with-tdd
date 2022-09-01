@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function useForm(formSchema, validationSchema, action) {
+function useForm(formSchema, validationSchema, action, cleanAfter = false) {
 	const [formData, setFormData] = useState(formSchema);
 	const [errors, setErrors] = useState({});
 
@@ -21,11 +21,21 @@ function useForm(formSchema, validationSchema, action) {
 		});
 	}
 
+	function clearError(name) {
+		if (!errors[name]) return;
+		setErrors((prevState) => {
+			const newErrors = { ...prevState };
+			delete newErrors[name];
+			return newErrors;
+		});
+	}
+
 	function handleChange({ target }) {
 		setFormData((prevData) => ({
 			...prevData,
 			[target.name]: target.value,
 		}));
+		clearError(target.name);
 	}
 
 	async function handleSubmit(e) {
@@ -35,12 +45,12 @@ function useForm(formSchema, validationSchema, action) {
 
 		if (!Object.keys(errors).length && !!action) {
 			action();
-			cleanup(e.target);
+			if (cleanAfter) cleanup(e.target);
 		}
 	}
 
 	function validate(data) {
-		const { error } = validationSchema.validate(data);
+		const { error } = validationSchema?.validate(data) || {};
 		const errors = error?.details.reduce((acc, err) => {
 			const {
 				path: [name],
