@@ -1,7 +1,7 @@
 import { render, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-beforeEach(cleanup);
+afterEach(cleanup);
 
 export function setupUser() {
 	return userEvent.setup();

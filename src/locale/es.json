@@ -1,0 +1,10 @@
+{
+	"signUp": "Registro",
+	"username": "Nombre de usuario",
+	"email": "Correo electronico",
+	"password": "Contraseña",
+	"confirmPassword": "Confirmar Contraseña",
+	"registerSuccess": "Bien hecho!",
+	"registerSuccessMsg": "Por favor verifica tu correo para activar tu cuenta",
+	"passwordMismatchMsg": "Las contraseñas no coinciden"
+}

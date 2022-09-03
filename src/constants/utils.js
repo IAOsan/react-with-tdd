@@ -1,3 +1,19 @@
+export async function makeApiCall(url, opts = {}) {
+	try {
+		const res = await fetch(url, opts);
+		if (!res.ok) {
+			const data = await res.json();
+			const error = new Error(res.statusText);
+			error.status = res.status;
+			error.validationErrors = data?.validationErrors;
+			throw error;
+		}
+		return res.json();
+	} catch (error) {
+		throw error;
+	}
+}
+
 export function getClasName(...str) {
 	return str
 		.reduce((acc, s) => {
