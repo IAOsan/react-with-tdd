@@ -12,6 +12,7 @@ function addToTracker(req) {
 	requestTracker.push({
 		path: req.url.pathname,
 		body: req.body,
+		headers: req.headers,
 		at: new Date().toLocaleTimeString(),
 	});
 }

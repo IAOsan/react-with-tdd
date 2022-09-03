@@ -1,5 +1,6 @@
 import { mswServer } from '../setupTestServer';
-import { render, setupUser, waitFor } from '../test-utils';
+import i18n from '../../locale/i18n';
+import { render, setupUser, waitFor, screen, act } from '../test-utils';
 import {
 	failureEmailPostUser,
 	failurePasswordPostUser,
@@ -7,7 +8,10 @@ import {
 	requestTracker,
 } from '../testServerHandlers';
 import LoginPage from '../../pages/Login.page';
+import en from '../../locale/en.json';
+import es from '../../locale/es.json';
 
+const renderLogin = () => render(<LoginPage />);
 const user = setupUser();
 const userCredentials = {
 	username: 'user name',
@@ -17,73 +21,79 @@ const userCredentials = {
 };
 
 describe('<LoginPage />', () => {
-	let wrapper = renderLogin();
-	let inputName,
+	let wrapper,
+		inputName,
 		inputEmail,
 		inputPassword,
 		inputConfirmPassword,
 		submitButton;
 
-	beforeEach(() => {
+	const setup = () => {
 		wrapper = renderLogin();
 		inputName = wrapper.getByLabelText(/username/i);
-		inputEmail = wrapper.getByLabelText(/email/i);
+		inputEmail = wrapper.getByLabelText(/e-mail/i);
 		inputPassword = wrapper.getByLabelText('Password');
 		inputConfirmPassword = wrapper.getByLabelText('Confirm Password');
 		submitButton = wrapper.getByRole('button', { name: /sign up/i });
-	});
+	};
 
-	it('should have heading', () => {
-		const heading = wrapper.getByRole('heading', { name: /sign up/i });
-
-		expect(heading).toBeInTheDocument();
-	});
-
-	it('should have username input', () => {
-		expect(inputName).toBeInTheDocument();
-	});
-
-	it('should have email input', () => {
-		expect(inputEmail).toBeInTheDocument();
-	});
-
-	it('should email input to be type of email', () => {
-		expect(inputEmail).toHaveAttribute('type', 'email');
-	});
-
-	it('should have password input', () => {
-		expect(inputPassword).toBeInTheDocument();
-	});
-
-	it('should have confirm password input', () => {
-		expect(inputConfirmPassword).toBeInTheDocument();
-	});
-
-	it('should password inputs to be type of password', () => {
-		expect(inputPassword).toHaveAttribute('type', 'password');
-		expect(inputConfirmPassword).toHaveAttribute('type', 'password');
-	});
-
-	it('should have sign up button', () => {
-		expect(submitButton).toBeInTheDocument();
-	});
-
-	it('should sign up button initially be disabled', () => {
-		expect(submitButton).toBeDisabled();
-	});
-
-	describe('interactions', () => {
-		const fillForm = async (values) => {
-			const credentials = {
-				...userCredentials,
-				...values,
-			};
-
-			await user.type(inputName, credentials.username);
-			await user.type(inputEmail, credentials.email);
-			await user.type(inputPassword, credentials.password);
-			await user.type(inputConfirmPassword, credentials.confirmPassword);
+	const fillForm = async (values) => {
+		const credentials = {
+			...userCredentials,
+			...values,
 		};
+
+		await user.type(inputName, credentials.username);
+		await user.type(inputEmail, credentials.email);
+		await user.type(inputPassword, credentials.password);
+		await user.type(inputConfirmPassword, credentials.confirmPassword);
+	};
+
+	describe('/*== layout ==*/', () => {
+		beforeEach(setup);
+
+		it('should have heading', () => {
+			const heading = screen.getByRole('heading', { name: /sign up/i });
+
+			expect(heading).toBeInTheDocument();
+		});
+
+		it('should have username input', () => {
+			expect(inputName).toBeInTheDocument();
+		});
+
+		it('should have email input', () => {
+			expect(inputEmail).toBeInTheDocument();
+		});
+
+		it('should email input to be type of email', () => {
+			expect(inputEmail).toHaveAttribute('type', 'email');
+		});
+
+		it('should have password input', () => {
+			expect(inputPassword).toBeInTheDocument();
+		});
+
+		it('should have confirm password input', () => {
+			expect(inputConfirmPassword).toBeInTheDocument();
+		});
+
+		it('should password inputs to be type of password', () => {
+			expect(inputPassword).toHaveAttribute('type', 'password');
+			expect(inputConfirmPassword).toHaveAttribute('type', 'password');
+		});
+
+		it('should have sign up button', () => {
+			expect(submitButton).toBeInTheDocument();
+		});
+
+		it('should sign up button initially be disabled', () => {
+			expect(submitButton).toBeDisabled();
+		});
+	});
+
+	describe('/*== interactions ==*/', () => {
+		beforeEach(setup);
 
 		it('should submit button be enabled if password and confirmPassword inputs have the same value', async () => {
 			await fillForm();
@@ -238,8 +248,114 @@ describe('<LoginPage />', () => {
 			).toBeNull();
 		});
 	});
-});
 
-function renderLogin() {
-	return render(<LoginPage />);
-}
+	describe('/*== internationalziation ==*/', () => {
+		let langSelector, heading, currentLng;
+		const changeLang = async (lng) => {
+			await user.selectOptions(langSelector, lng);
+		};
+		const setup = () => {
+			currentLng = i18n.language;
+			const languages = {
+				en,
+				es,
+			};
+			const language = languages[currentLng];
+
+			heading = screen.getByRole('heading', { name: language.signUp });
+			inputName = screen.getByLabelText(language.username);
+			inputEmail = screen.getByLabelText(language.email);
+			inputPassword = screen.getByLabelText(language.password);
+			inputConfirmPassword = screen.getByLabelText(
+				language.confirmPassword
+			);
+			submitButton = screen.getByRole('button', {
+				name: language.signUp,
+			});
+		};
+
+		beforeEach(() => {
+			wrapper = renderLogin();
+			langSelector = document.getElementById('languageSelector');
+		});
+
+		afterEach(() => {
+			act(() => {
+				i18n.changeLanguage('en');
+			});
+		});
+
+		it('should initially displays text in english', async () => {
+			setup();
+
+			expect(currentLng).toBe('en');
+			expect(heading).toBeInTheDocument();
+			expect(inputName).toBeInTheDocument();
+			expect(inputEmail).toBeInTheDocument();
+			expect(inputPassword).toBeInTheDocument();
+			expect(inputConfirmPassword).toBeInTheDocument();
+		});
+
+		it('should displays text in spanish after change language', async () => {
+			await changeLang('es');
+
+			setup();
+
+			expect(currentLng).toBe('es');
+			expect(heading).toBeInTheDocument();
+			expect(inputName).toBeInTheDocument();
+			expect(inputEmail).toBeInTheDocument();
+			expect(inputPassword).toBeInTheDocument();
+			expect(inputConfirmPassword).toBeInTheDocument();
+		});
+
+		it('should displays text in english after change language', async () => {
+			await changeLang('es');
+			await changeLang('en');
+
+			setup();
+
+			expect(currentLng).toBe('en');
+			expect(heading).toBeInTheDocument();
+			expect(inputName).toBeInTheDocument();
+			expect(inputEmail).toBeInTheDocument();
+			expect(inputPassword).toBeInTheDocument();
+			expect(inputConfirmPassword).toBeInTheDocument();
+		});
+
+		it('should displays password validation in spanish', async () => {
+			await changeLang('es');
+
+			setup();
+			await user.type(inputPassword, '12345');
+			await user.type(inputConfirmPassword, 'hello');
+
+			expect(
+				screen.getByText(es.passwordMismatchMsg)
+			).toBeInTheDocument();
+		});
+
+		it('should sends accept language header as "en" for outgoing request', async () => {
+			setup();
+
+			await fillForm();
+			await user.click(submitButton);
+
+			const [request] = requestTracker;
+
+			expect(request.headers.get('Accept-Language')).toBe('en');
+		});
+
+		it('should sends accept language header as "es" for outgoing request after change language', async () => {
+			await changeLang('es');
+			setup();
+
+			await fillForm();
+			await user.click(submitButton);
+
+			const [request] = requestTracker;
+
+			expect(request.headers.get('Accept-Language')).toBe('es');
+		});
+	});
+});

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Form from '../components/common/Form.component';
 import useForm from '../hooks/useForm';
+import LanguageSelector from '../components/LanguageSelector.component';
+import { registerEmailPassword } from '../services/auth.service';
 
 export function LoginPage() {
 	const formSchema = {
@@ -16,6 +19,7 @@ export function LoginPage() {
 		handleSubmit,
 		handleChange,
 	} = useForm(formSchema, null, doSubmit);
+	const { t, i18n } = useTranslation();
 	const [isSuccessful, setIsSuccessful] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const someInputsAreEmpty = Object.keys(values).some((k) => !values[k]);
@@ -24,32 +28,12 @@ export function LoginPage() {
 		isLoading || someInputsAreEmpty || passwordsNotMatch;
 
 	async function doSubmit() {
-		const base_url = window.location.origin;
-		const url = new URL('/api/1.0/users', base_url);
-
 		setIsLoading(true);
 		try {
-			const res = await fetch(url, {
-				method: 'POST',
-				body: JSON.stringify(values),
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			});
-			if (!res.ok) {
-				const data = await res.json();
-				const error = new Error(res.statusText);
-				error.status = res.status;
-				error.validationErrors = data?.validationErrors;
-				throw error;
-			}
+			await registerEmailPassword(values, i18n.language);
 			setIsSuccessful(true);
 		} catch (error) {
-			if (error.status >= 400 && error.status < 500) {
-				setErrors(error.validationErrors);
-				return;
-			}
-			console.error('oops: ', error.message);
+			setErrors(error.validationErrors);
 		} finally {
 			setIsLoading(false);
 		}
@@ -62,11 +46,11 @@ export function LoginPage() {
 					{!isSuccessful ? (
 						<>
 							<Form
-								title='Sign up'
+								title={t('signUp')}
 								fields={[
 									{
 										id: 'inputUsername',
-										label: 'Username',
+										label: t('username'),
 										type: 'text',
 										name: 'username',
 										value: values.username,
@@ -75,7 +59,7 @@ export function LoginPage() {
 									},
 									{
 										id: 'inputEmail',
-										label: 'Email',
+										label: t('email'),
 										type: 'email',
 										name: 'email',
 										value: values.email,
@@ -84,7 +68,7 @@ export function LoginPage() {
 									},
 									{
 										id: 'inputPassword',
-										label: 'Password',
+										label: t('password'),
 										type: 'password',
 										name: 'password',
 										value: values.password,
@@ -93,20 +77,21 @@ export function LoginPage() {
 									},
 									{
 										id: 'inputConfirmPassword',
-										label: 'Confirm Password',
+										label: t('confirmPassword'),
 										type: 'password',
 										name: 'confirmPassword',
 										value: values.confirmPassword,
 										onChange: handleChange,
 										error: passwordsNotMatch
-											? 'Password mismatch'
+											? t('passwordMismatchMsg')
 											: '',
 									},
 								]}
-								submitLabel='Sign up'
+								submitLabel={t('signUp')}
 								disableSubmit={isSubmitDisabled}
 								onSubmit={handleSubmit}
 								isLoading={isLoading}
+								content={() => <LanguageSelector />}
 							/>
 						</>
 					) : (
