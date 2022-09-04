@@ -13,9 +13,11 @@
 		"start": "browser-sync start --server 'dist' --files 'dist' --no-open"
 	},
 	"dependencies": {
+		"i18next": "^21.9.1",
 		"prop-types": "15.8.1",
 		"react": "18.2.0",
-		"react-dom": "18.2.0"
+		"react-dom": "18.2.0",
+		"react-i18next": "^11.18.5"
 	},
 	"devDependencies": {
 		"@testing-library/jest-dom": "5.16.5",
