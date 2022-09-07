@@ -7,11 +7,11 @@ import {
 	failureUsernamePostUser,
 	requestTracker,
 } from '../testServerHandlers';
-import LoginPage from '../../pages/Login.page';
+import SignUpPage from '../../pages/SignUp.page';
 import en from '../../locale/en.json';
 import es from '../../locale/es.json';
 
-const renderLogin = () => render(<LoginPage />);
+const renderLogin = () => render(<SignUpPage />);
 const user = setupUser();
 const userCredentials = {
 	username: 'user name',
@@ -20,7 +20,7 @@ const userCredentials = {
 	confirmPassword: '123456',
 };
 
-describe('<LoginPage />', () => {
+describe('<SignUpPage />', () => {
 	let wrapper,
 		inputName,
 		inputEmail,

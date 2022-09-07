@@ -3,12 +3,13 @@ export async function makeApiCall(url, opts = {}) {
 		const res = await fetch(url, opts);
 		if (!res.ok) {
 			const data = await res.json();
-			const error = new Error(res.statusText);
+			const error = new Error();
 			error.status = res.status;
 			error.validationErrors = data?.validationErrors;
+			error.message = data?.message || res.statusText;
 			throw error;
 		}
-		return res.json();
+		return await res.json();
 	} catch (error) {
 		throw error;
 	}

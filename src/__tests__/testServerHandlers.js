@@ -1,10 +1,11 @@
 import { rest } from 'msw';
 
 export let requestTracker = [];
-const base_url = window.location.origin;
-const USERS_ENDPOINT = `${base_url}/api/1.0/users`;
+const BASE_URL = window.location.origin;
+const USERS_ENDPOINT = `${BASE_URL}/api/1.0/users`;
+const ACTIVATION_ENDPOINT = `${BASE_URL}/api/1.0/users/token/:token`;
 
-beforeEach(() => {
+afterEach(() => {
 	requestTracker = [];
 });
 
@@ -78,4 +79,22 @@ export const failurePasswordPostUser = rest.post(
 	}
 );
 
-export const handlers = [successPostUser];
+export const successAccountActivation = rest.post(
+	ACTIVATION_ENDPOINT,
+	(req, res, ctx) => {
+		addToTracker(req);
+
+		return res(ctx.status(200), ctx.json('ok'));
+	}
+);
+
+export const failureAccountActivation = rest.post(
+	ACTIVATION_ENDPOINT,
+	(req, res, ctx) => {
+		addToTracker(req);
+
+		return res(ctx.status(400), ctx.json('not ok'));
+	}
+);
+
+export const handlers = [successPostUser, successAccountActivation];

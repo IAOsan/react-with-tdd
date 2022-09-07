@@ -1,6 +1,7 @@
 import React from 'react';
-import FormInput from './FormInput.component';
 import PropTypes from 'prop-types';
+import FormInput from './FormInput.component';
+import Spinner from './Spinner.component';
 import { getClasName } from '../../constants/utils';
 
 function Form({
@@ -32,14 +33,8 @@ function Form({
 					type='submit'
 					disabled={disableSubmit}
 				>
-					{isLoading && (
-						<span
-							className='spinner-border spinner-border-sm mr-2'
-							role='status'
-							aria-hidden='true'
-						></span>
-					)}
-					{submitLabel}
+					{isLoading && <Spinner sm customClassname='me-2' />}
+					<span>{submitLabel}</span>
 				</button>
 			</div>
 

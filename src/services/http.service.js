@@ -13,7 +13,7 @@ export function handleError(error) {
 }
 
 export const http = {
-	post: (path, { headers = {}, ...rest }) =>
+	post: (path, { headers = {}, ...rest } = {}) =>
 		makeApiCall(generateUrl(path), {
 			method: 'POST',
 			headers: {

@@ -5,5 +5,5 @@ export { rest } from 'msw';
 export const mswServer = setupServer(...handlers);
 
 beforeEach(() => mswServer.listen());
-afterAll(() => mswServer.close());
 afterEach(() => mswServer.resetHandlers());
+afterAll(() => mswServer.close());

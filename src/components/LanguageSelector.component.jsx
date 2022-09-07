@@ -14,14 +14,14 @@ function LanguageSelector() {
 
 	return (
 		<div className='mx-4 my-2'>
-			<label htmlFor='languageSelector' className='mr-2'>
+			<label htmlFor='languageSelector' className='me-2'>
 				Select language
 			</label>
 			<select
 				onChange={handleChangeLanguage}
 				name='languages'
 				id='languageSelector'
-				defaultValue='en'
+				defaultValue={i18n.language}
 			>
 				{languages.map(({ key, label }) => (
 					<option key={key} value={key}>
