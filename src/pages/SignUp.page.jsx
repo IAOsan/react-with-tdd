@@ -106,7 +106,6 @@ export function SignUpPage() {
 								disableSubmit={isSubmitDisabled}
 								onSubmit={handleSubmit}
 								isLoading={status === 'pending'}
-								content={() => <LanguageSelector />}
 							/>
 						</HandleState>
 					</div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 function LanguageSelector() {
-	const { i18n } = useTranslation();
+	const { t, i18n } = useTranslation();
 	const languages = [
 		{ key: 'en', label: 'English' },
 		{ key: 'es', label: 'Español' },
@@ -13,9 +13,9 @@ function LanguageSelector() {
 	}
 
 	return (
-		<div className='mx-4 my-2'>
+		<div className='my-2'>
 			<label htmlFor='languageSelector' className='me-2'>
-				Select language
+				{t('selectLanguage')}
 			</label>
 			<select
 				onChange={handleChangeLanguage}

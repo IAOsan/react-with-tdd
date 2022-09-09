@@ -29,7 +29,7 @@ HandleState.propTypes = {
 		successState: PropTypes.func,
 		errorState: PropTypes.func,
 	}).isRequired,
-	children: PropTypes.element,
+	children: PropTypes.any,
 };
 
 HandleState.defaultProps = {

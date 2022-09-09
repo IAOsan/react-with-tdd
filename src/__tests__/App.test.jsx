@@ -128,4 +128,12 @@ describe('<App />', () => {
 
 		expect(screen.getByTestId('home-page')).toBeInTheDocument();
 	});
+
+	it('should navigate to user page when clicks user name in the list', async () => {
+		setup();
+
+		await user.click(await screen.findByRole('link', { name: 'aaa' }));
+
+		expect(screen.queryByTestId('details-page')).toBeInTheDocument();
+	});
 });

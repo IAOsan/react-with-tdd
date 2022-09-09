@@ -6,5 +6,9 @@
 	"confirmPassword": "Confirmar Contraseña",
 	"registerSuccess": "Bien hecho!",
 	"registerSuccessMsg": "Por favor verifica tu correo para activar tu cuenta",
-	"passwordMismatchMsg": "Las contraseñas no coinciden"
+	"passwordMismatchMsg": "Las contraseñas no coinciden",
+	"selectLanguage": "Selecciona el idioma",
+	"users": "Usuarios",
+	"nextPage": "Siguiente >",
+	"prevPage": "< Anterior"
 }

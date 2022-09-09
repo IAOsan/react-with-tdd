@@ -6,5 +6,9 @@
 	"confirmPassword": "Confirm Password",
 	"registerSuccess": "Well done!",
 	"registerSuccessMsg": "Please check your e-mail to activate your account",
-	"passwordMismatchMsg": "Password mismatch"
+	"passwordMismatchMsg": "Password mismatch",
+	"selectLanguage": "Select language",
+	"users": "Users",
+	"nextPage": "Next >",
+	"prevPage": "< Prev"
 }

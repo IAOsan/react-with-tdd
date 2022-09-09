@@ -27,7 +27,7 @@ function Alert({ type, message, inline }) {
 Alert.propTypes = {
 	type: PropTypes.oneOf(['success', 'danger']).isRequired,
 	message: PropTypes.shape({
-		emphasis: PropTypes.string.isRequired,
+		emphasis: PropTypes.string,
 		text: PropTypes.string.isRequired,
 	}).isRequired,
 	inline: PropTypes.bool,

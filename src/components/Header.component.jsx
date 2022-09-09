@@ -6,7 +6,7 @@ function Header() {
 		<header>
 			<Navbar
 				brand={{
-					img: new URL('./assets/hoaxify.png', import.meta.url),
+					img: new URL('../assets/hoaxify.png', import.meta.url),
 					label: 'Hoaxify',
 				}}
 				menu={[

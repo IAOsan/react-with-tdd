@@ -10,8 +10,15 @@ import {
 import SignUpPage from '../../pages/SignUp.page';
 import en from '../../locale/en.json';
 import es from '../../locale/es.json';
+import LanguageSelector from '../../components/LanguageSelector.component';
 
-const renderLogin = () => render(<SignUpPage />);
+const renderLogin = () =>
+	render(
+		<>
+			<SignUpPage />
+			<LanguageSelector />
+		</>
+	);
 const user = setupUser();
 const userCredentials = {
 	username: 'user name',
