@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Form from '../components/common/Form.component';
 import useForm from '../hooks/useForm';
-import LanguageSelector from '../components/LanguageSelector.component';
 import Alert from '../components/common/Alert.component';
 import HandleState from '../components/common/HandleState.component';
-import { registerEmailPassword } from '../services/auth.service';
+import { registerEmailPassword } from '../services/users.service';
 
 export function SignUpPage() {
 	const { t } = useTranslation();

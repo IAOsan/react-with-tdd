@@ -29,7 +29,7 @@ function Form({
 					<FormInput key={f.id || idx} {...f} />
 				))}
 				<button
-					className='btn btn-primary btn-lg d-block w-100'
+					className='btn btn-primary btn-lg d-block w-100 mt-4'
 					type='submit'
 					disabled={disableSubmit}
 				>

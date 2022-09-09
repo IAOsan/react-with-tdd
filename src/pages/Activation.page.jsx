@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import Alert from '../components/common/Alert.component';
 import Spinner from '../components/common/Spinner.component';
 import HandleState from '../components/common/HandleState.component';
-import { activation } from '../services/auth.service';
+import { activation } from '../services/users.service';
 
 export function ActivationPage() {
 	const [status, setStatus] = useState('idle');

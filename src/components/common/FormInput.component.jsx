@@ -12,7 +12,7 @@ function FormInput({
 }) {
 	const groupClassname = getClasName(
 		{ [customGroupClass]: !!customGroupClass },
-		{ 'form-group': !customGroupClass }
+		{ 'form-group py-2': !customGroupClass }
 	);
 	const inputClassname = getClasName(
 		{ [customInputClass]: !!customInputClass },

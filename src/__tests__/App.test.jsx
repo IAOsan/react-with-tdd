@@ -1,5 +1,5 @@
 import './setupTestServer';
-import { render, screen, setupUser } from './test-utils';
+import { render, screen, setupUser, waitFor } from './test-utils';
 import App from '../App';
 
 const renderApp = () => {
@@ -135,5 +135,24 @@ describe('<App />', () => {
 		await user.click(await screen.findByRole('link', { name: 'aaa' }));
 
 		expect(screen.queryByTestId('details-page')).toBeInTheDocument();
+	});
+
+	describe('/*== login ==*/', () => {
+		const inputEmail = () => screen.getByLabelText(/e-mail/i),
+			inputPassword = () => screen.getByLabelText(/password/i),
+			submitButton = () =>
+				screen.getByRole('button', { name: /sign in/i });
+
+		it('should redirects to home page after succesful login', async () => {
+			setup('/login');
+
+			await user.type(inputEmail(), 'aaa@mail.com');
+			await user.type(inputPassword(), '123456');
+			await user.click(submitButton());
+
+			await waitFor(() => {
+				expect(screen.getByTestId('home-page')).toBeInTheDocument();
+			}, 1000);
+		});
 	});
 });

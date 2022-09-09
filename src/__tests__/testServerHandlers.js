@@ -3,6 +3,7 @@ import { rest } from 'msw';
 export let requestTracker = [];
 const BASE_URL = window.location.origin;
 const USERS_ENDPOINT = `${BASE_URL}/api/1.0/users`;
+const AUTH_ENDPOINT = `${BASE_URL}/api/1.0/auth`;
 const ACTIVATION_ENDPOINT = `${BASE_URL}/api/1.0/users/token/:token`;
 const users = [
 	{
@@ -53,7 +54,7 @@ afterEach(() => {
 	requestTracker = [];
 });
 
-function addToTracker(req) {
+function track(req) {
 	requestTracker.push({
 		path: req.url.pathname,
 		body: req.body,
@@ -72,7 +73,7 @@ function generateAuthError(errors) {
 }
 
 export const successPostUser = rest.post(USERS_ENDPOINT, (req, res, ctx) => {
-	addToTracker(req);
+	track(req);
 
 	return res(
 		ctx.delay(100),
@@ -126,7 +127,7 @@ export const failurePasswordPostUser = rest.post(
 export const successAccountActivation = rest.post(
 	ACTIVATION_ENDPOINT,
 	(req, res, ctx) => {
-		addToTracker(req);
+		track(req);
 
 		return res(ctx.status(200), ctx.json('ok'));
 	}
@@ -135,7 +136,7 @@ export const successAccountActivation = rest.post(
 export const failureAccountActivation = rest.post(
 	ACTIVATION_ENDPOINT,
 	(req, res, ctx) => {
-		addToTracker(req);
+		track(req);
 
 		return res(ctx.status(400), ctx.json('not ok'));
 	}
@@ -145,7 +146,7 @@ export const successGeAllUsers = rest.get(USERS_ENDPOINT, (req, res, ctx) => {
 	const page = req.url.searchParams.get('page'),
 		size = req.url.searchParams.get('size');
 
-	addToTracker(req);
+	track(req);
 
 	function getPage(page, size) {
 		const pageNumber = isNaN(page) ? 0 : +page,
@@ -163,26 +164,42 @@ export const successGeAllUsers = rest.get(USERS_ENDPOINT, (req, res, ctx) => {
 	return res(ctx.status(200), ctx.json(getPage(page, size)));
 });
 
-export const successGetUserById = rest.get(
+export const getUserById = rest.get(
 	`${USERS_ENDPOINT}/:id`,
 	(req, res, ctx) => {
 		const { id } = req.params;
-		const user = users[id - 1];
-		const status = user ? 200 : 404;
-		const json = user || {
-			message: 'User not found',
-			path: `/api/1.0/users/${id}`,
-			timestamp: 1662676877397,
-		};
+		const user = users[id - 1],
+			status = user ? 200 : 404,
+			json = user || {
+				message: 'User not found',
+				path: `/api/1.0/users/${id}`,
+				timestamp: 1662676877397,
+			};
 
-		addToTracker(req);
+		track(req);
 		return res(ctx.status(status), ctx.json(json));
 	}
 );
+
+export const loginUser = rest.post(AUTH_ENDPOINT, (req, res, ctx) => {
+	const { email } = req.body;
+	const user = users.find((u) => u.email === email),
+		status = user ? 200 : 404,
+		json = user || {
+			message: 'User not found',
+			path: `/api/1.0/auth`,
+			timestamp: 1662676877397,
+		};
+
+	track(req);
+
+	return res(ctx.delay(200), ctx.status(status), ctx.json(json));
+});
 
 export const handlers = [
 	successPostUser,
 	successAccountActivation,
 	successGeAllUsers,
-	successGetUserById,
+	getUserById,
+	loginUser,
 ];
