@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
-function Navbar({ brand, menu }) {
+function Navbar({ brand, menu, content }) {
 	return (
 		<nav className='navbar navbar-expand-md navbar-dark bg-primary'>
 			<div className='container'>
@@ -24,17 +24,17 @@ function Navbar({ brand, menu }) {
 					<span className='navbar-toggler-icon'></span>
 				</button>
 				<div className='collapse navbar-collapse' id='navbarColor01'>
-					{menu && (
-						<ul className='navbar-nav ms-auto'>
-							{menu.map(({ path, label }) => (
+					<ul className='navbar-nav ms-auto'>
+						{menu &&
+							menu.map(({ path, label }) => (
 								<li key={path} className='nav-item'>
 									<Link className='nav-link' to={path}>
 										{label}
 									</Link>
 								</li>
 							))}
-						</ul>
-					)}
+						{content && content()}
+					</ul>
 				</div>
 			</div>
 		</nav>
@@ -52,6 +52,7 @@ Navbar.propTypes = {
 			path: PropTypes.string,
 		})
 	),
+	content: PropTypes.func,
 };
 
 export default Navbar;

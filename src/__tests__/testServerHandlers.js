@@ -185,11 +185,13 @@ export const loginUser = rest.post(AUTH_ENDPOINT, (req, res, ctx) => {
 	const { email } = req.body;
 	const user = users.find((u) => u.email === email),
 		status = user ? 200 : 404,
-		json = user || {
-			message: 'User not found',
-			path: `/api/1.0/auth`,
-			timestamp: 1662676877397,
-		};
+		json = user
+			? { ...user, token: 'abcdef' }
+			: {
+					message: 'User not found',
+					path: `/api/1.0/auth`,
+					timestamp: 1662676877397,
+			  };
 
 	track(req);
 

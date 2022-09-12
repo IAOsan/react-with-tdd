@@ -21,7 +21,7 @@ function useForm(formSchema, validationSchema, action, cleanAfter = false) {
 		});
 	}
 
-	function clearError(name) {
+	function cleanUpErrors(name) {
 		if (!errors[name]) return;
 		setErrors((prevState) => {
 			const newErrors = { ...prevState };
@@ -35,7 +35,7 @@ function useForm(formSchema, validationSchema, action, cleanAfter = false) {
 			...prevData,
 			[target.name]: target.value,
 		}));
-		clearError(target.name);
+		cleanUpErrors(target.name);
 	}
 
 	async function handleSubmit(e) {

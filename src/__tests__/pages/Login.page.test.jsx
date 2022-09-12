@@ -1,19 +1,31 @@
 import '../setupTestServer';
 import i18n from '../../locale/i18n';
 import { MemoryRouter } from 'react-router-dom';
-import { render, setupUser, waitFor, screen, act } from '../test-utils';
+import {
+	renderWithProviders,
+	setupUser,
+	waitFor,
+	screen,
+	act,
+	waitForElementToBeRemoved,
+} from '../test-utils';
 import { requestTracker } from '../testServerHandlers';
 import LoginPage from '../../pages/Login.page';
 import LanguageSelector from '../../components/LanguageSelector.component';
+import * as storageService from '../../services/storage.service';
+import createStore, { STATE_KEY } from '../../store/storeConfig';
 import en from '../../locale/en.json';
 import es from '../../locale/es.json';
 
 const renderLogin = () => {
-	render(
+	const store = createStore();
+
+	renderWithProviders(
 		<MemoryRouter>
 			<LoginPage />
 			<LanguageSelector />
-		</MemoryRouter>
+		</MemoryRouter>,
+		{ store }
 	);
 };
 const user = setupUser();
@@ -75,6 +87,7 @@ describe('<LoginPage />', () => {
 
 	describe('/*== interactions ==*/', () => {
 		beforeEach(renderLogin);
+		afterEach(storageService.clear);
 
 		it('should enable submit if the form are filled', async () => {
 			await fillForm();
@@ -145,6 +158,22 @@ describe('<LoginPage />', () => {
 
 			expect(screen.queryByText(/user not found/i)).toBeNull();
 		});
+
+		it('should stores id username image and token in localstorage', async () => {
+			await fillForm();
+			await user.click(submitButton());
+
+			await waitForElementToBeRemoved(spinner());
+
+			await waitFor(() => {
+				const persistedState = storageService.getItem(STATE_KEY);
+				const objectKeys = Object.keys(persistedState.auth.user);
+				expect(objectKeys.includes('id')).toBeTruthy();
+				expect(objectKeys.includes('username')).toBeTruthy();
+				expect(objectKeys.includes('image')).toBeTruthy();
+				expect(objectKeys.includes('token')).toBeTruthy();
+			});
+		});
 	});
 
 	describe('/*== internationalziation ==*/', () => {
@@ -153,6 +182,7 @@ describe('<LoginPage />', () => {
 		}
 
 		beforeEach(renderLogin);
+		afterEach(storageService.clear);
 
 		afterEach(() => {
 			act(() => {
@@ -188,7 +218,7 @@ describe('<LoginPage />', () => {
 
 		it('should sends accept language header as "en" for outgoing request', async () => {
 			await fillForm();
-			await user.click(submitButton());
+			await user.keyboard('{Enter>1}');
 
 			const [request] = requestTracker;
 
@@ -199,7 +229,7 @@ describe('<LoginPage />', () => {
 			await changeLang('es');
 
 			await fillForm();
-			await user.click(submitButton(es));
+			await user.keyboard('{Enter>1}');
 
 			const [request] = requestTracker;
 
