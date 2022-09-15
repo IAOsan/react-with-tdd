@@ -1,13 +1,20 @@
 import './setupTestServer';
 import { MemoryRouter } from 'react-router-dom';
-import { renderWithProviders, screen, setupUser, waitFor } from './test-utils';
-import createStore, { STATE_KEY } from '../store/storeConfig';
+import {
+	renderWithProviders,
+	screen,
+	setupUser,
+	waitFor,
+	waitForElementToBeRemoved,
+} from './test-utils';
+import createStore from '../store/storeConfig';
+import { STATE_KEY } from '../config';
 import * as storageService from '../services/storage.service';
+import { requestTracker } from './testServerHandlers';
 import App from '../App';
 
 const renderApp = (entries = ['/']) => {
 	const store = createStore();
-
 	return renderWithProviders(
 		<MemoryRouter initialEntries={entries}>
 			<App />
@@ -28,10 +35,40 @@ describe('<App />', () => {
 		accountActivationPage = () => screen.queryByTestId('activation-page'),
 		linkLogin = () => screen.queryByRole('link', { name: /login/i }),
 		linkSignup = () => screen.queryByRole('link', { name: /sign up/i }),
-		linkHome = () => screen.queryByRole('link', { name: /hoaxify/i });
+		linkHome = () => screen.queryByRole('link', { name: /hoaxify/i }),
+		inputEmail = () => screen.getByLabelText(/e-mail/i),
+		inputPassword = () => screen.getByLabelText(/password/i),
+		submitButton = () => screen.getByRole('button', { name: /sign in/i }),
+		profileLink = () => screen.queryByRole('link', { name: /my profile/i }),
+		logoutLink = () => screen.queryByRole('link', { name: /logout/i }),
+		spinner = () => screen.queryByText(/loading.../i),
+		deleteAccountBtn = () =>
+			screen.queryByRole('button', { name: /delete my account/i }),
+		modalConfirmBtn = () => screen.queryByTestId('modal-confirm-btn');
 
 	function setup(path = '/') {
 		renderApp([path]);
+	}
+
+	async function fillForm() {
+		await user.type(inputEmail(), 'aaa@mail.com');
+		await user.type(inputPassword(), '123456');
+	}
+
+	function setAuthLocalStorage() {
+		storageService.setItem(STATE_KEY, {
+			auth: {
+				user: {
+					id: 1,
+					username: 'aaa',
+					email: 'aaa@mail.com',
+					image: null,
+				},
+				isAuth: true,
+				status: 'success',
+				error: null,
+			},
+		});
 	}
 
 	it('should displays initially only home page', () => {
@@ -141,18 +178,6 @@ describe('<App />', () => {
 	});
 
 	describe('/*== login ==*/', () => {
-		const inputEmail = () => screen.getByLabelText(/e-mail/i),
-			inputPassword = () => screen.getByLabelText(/password/i),
-			submitButton = () =>
-				screen.getByRole('button', { name: /sign in/i }),
-			profileLink = () =>
-				screen.queryByRole('link', { name: /my profile/i });
-
-		async function fillForm() {
-			await user.type(inputEmail(), 'aaa@mail.com');
-			await user.type(inputPassword(), '123456');
-		}
-
 		afterEach(storageService.clear);
 
 		it('should redirects to home page after succesful login', async () => {
@@ -227,24 +252,93 @@ describe('<App />', () => {
 		});
 
 		it('should restore state in local storage', async () => {
-			storageService.setItem(STATE_KEY, {
-				auth: {
-					user: {
-						id: 1,
-						username: 'aaa',
-						email: 'aaa@mail.com',
-						image: null,
-					},
-					isAuth: true,
-					status: 'success',
-					error: null,
-				},
-			});
+			setAuthLocalStorage();
 			setup();
 
 			await waitFor(() => {
 				expect(profileLink()).toBeInTheDocument();
 			});
+		});
+	});
+
+	describe('/*== logout ==*/', () => {
+		afterEach(storageService.clear);
+
+		it('should displays logout link in navbar after successful login', async () => {
+			setup('/login');
+
+			await fillForm();
+			await user.click(submitButton());
+
+			await waitFor(() => {
+				expect(logoutLink()).toBeInTheDocument();
+			});
+		});
+
+		it('should displays login and signup on navbar after clicking logout link', async () => {
+			setup('/login');
+
+			await fillForm();
+			await user.click(submitButton());
+			await waitForElementToBeRemoved(spinner());
+
+			await user.click(logoutLink());
+
+			expect(linkLogin()).toBeInTheDocument();
+			expect(linkSignup()).toBeInTheDocument();
+		});
+
+		it('should sends request after clicking logout link', async () => {
+			setup('/login');
+
+			await fillForm();
+			await user.click(submitButton());
+			await waitForElementToBeRemoved(spinner());
+
+			await user.click(logoutLink());
+
+			const lastCall = requestTracker[requestTracker.length - 1];
+			expect(lastCall.path.includes('logout')).toBeTruthy();
+		});
+
+		it('should remove authorization header in request sent after logout', async () => {
+			setup('/login');
+
+			await fillForm();
+			await user.click(submitButton());
+			await waitForElementToBeRemoved(spinner());
+
+			await user.click(logoutLink());
+			await user.click(screen.getByRole('link', { name: 'aaa' }));
+
+			const lastCall = requestTracker[requestTracker.length - 1];
+			expect(lastCall.headers.get('Authorization')).toBeFalsy();
+		});
+	});
+
+	describe('/*== delete a user ==*/', () => {
+		it('should redirects to login page after successful deletion', async () => {
+			setAuthLocalStorage();
+			setup('/user/1');
+
+			await waitForElementToBeRemoved(spinner());
+			await user.click(deleteAccountBtn());
+			await user.click(modalConfirmBtn());
+			await waitForElementToBeRemoved(spinner());
+
+			expect(homePage()).toBeInTheDocument();
+		});
+
+		it('should displays login and signup links in navbar after successful user deletion', async () => {
+			setAuthLocalStorage();
+			setup('/user/1');
+
+			await waitForElementToBeRemoved(spinner());
+			await user.click(deleteAccountBtn());
+			await user.click(modalConfirmBtn());
+
+			expect(linkLogin()).toBeInTheDocument();
+			expect(linkSignup()).toBeInTheDocument();
 		});
 	});
 });

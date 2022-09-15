@@ -36,17 +36,16 @@ function Form({
 					{isLoading && <Spinner sm customClassname='me-2' />}
 					<span>{submitLabel}</span>
 				</button>
+				{content && content()}
+				{action && (
+					<p className='mt-20 text-center'>
+						{action.desc}
+						<a href={action.path} className='mx-8 text-underline'>
+							{action.label}
+						</a>
+					</p>
+				)}
 			</div>
-
-			{content && content()}
-			{action && (
-				<p className='mt-20 text-center'>
-					{action.desc}
-					<a href={action.path} className='mx-8 text-underline'>
-						{action.label}
-					</a>
-				</p>
-			)}
 		</form>
 	);
 }

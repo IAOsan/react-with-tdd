@@ -9,7 +9,8 @@ export async function makeApiCall(url, opts = {}) {
 			error.message = data?.message || res.statusText;
 			throw error;
 		}
-		return await res.json();
+		if (!!res.headers.get('content-type')) return res.json();
+		return res.text();
 	} catch (error) {
 		throw error;
 	}

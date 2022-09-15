@@ -11,5 +11,14 @@
 	"users": "Usuarios",
 	"nextPage": "Siguiente >",
 	"prevPage": "< Anterior",
-	"signIn": "Iniciar sesión"
+	"signIn": "Iniciar sesión",
+	"login": "Iniciar sesión",
+	"myProfile": "Mi perfil",
+	"logout": "Cerrar sesión",
+	"edit": "Editar",
+	"deleteMyAccount": "Eliminar mi cuenta",
+	"save": "Guardar",
+	"cancel": "Cancelar",
+	"accountDeletionMessage": "Estás seguro de borrar tú cuenta?",
+	"yes": "Si"
 }

@@ -361,7 +361,6 @@ describe('<SignUpPage />', () => {
 			await user.click(submitButton);
 
 			const [request] = requestTracker;
-
 			expect(request.headers.get('Accept-Language')).toBe('es');
 		});
 	});

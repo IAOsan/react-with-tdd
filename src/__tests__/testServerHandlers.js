@@ -1,10 +1,16 @@
 import { rest } from 'msw';
+import {
+	BASE_URL,
+	USERS_ENDPOINT,
+	AUTH_ENDPOINT,
+	LOGOUT_ENDPOINT,
+} from '../config';
 
 export let requestTracker = [];
-const BASE_URL = window.location.origin;
-const USERS_ENDPOINT = `${BASE_URL}/api/1.0/users`;
-const AUTH_ENDPOINT = `${BASE_URL}/api/1.0/auth`;
-const ACTIVATION_ENDPOINT = `${BASE_URL}/api/1.0/users/token/:token`;
+const usersEndpoint = `${BASE_URL}${USERS_ENDPOINT}`;
+const authEndpoint = `${BASE_URL}${AUTH_ENDPOINT}`;
+const logoutEndpoint = `${BASE_URL}${LOGOUT_ENDPOINT}`;
+const activationEndpoint = `${BASE_URL}${USERS_ENDPOINT}/token/:token`;
 const users = [
 	{
 		id: 1,
@@ -58,6 +64,7 @@ function track(req) {
 	requestTracker.push({
 		path: req.url.pathname,
 		body: req.body,
+		params: { ...req.params },
 		headers: req.headers,
 		at: new Date().toLocaleTimeString(),
 	});
@@ -72,7 +79,7 @@ function generateAuthError(errors) {
 	};
 }
 
-export const successPostUser = rest.post(USERS_ENDPOINT, (req, res, ctx) => {
+export const successPostUser = rest.post(usersEndpoint, (req, res, ctx) => {
 	track(req);
 
 	return res(
@@ -87,7 +94,7 @@ export const successPostUser = rest.post(USERS_ENDPOINT, (req, res, ctx) => {
 });
 
 export const failureUsernamePostUser = rest.post(
-	USERS_ENDPOINT,
+	usersEndpoint,
 	(req, res, ctx) => {
 		return res(
 			ctx.status(400),
@@ -101,7 +108,7 @@ export const failureUsernamePostUser = rest.post(
 );
 
 export const failureEmailPostUser = rest.post(
-	USERS_ENDPOINT,
+	usersEndpoint,
 	(req, res, ctx) => {
 		return res(
 			ctx.status(400),
@@ -111,7 +118,7 @@ export const failureEmailPostUser = rest.post(
 );
 
 export const failurePasswordPostUser = rest.post(
-	USERS_ENDPOINT,
+	usersEndpoint,
 	(req, res, ctx) => {
 		return res(
 			ctx.status(400),
@@ -125,7 +132,7 @@ export const failurePasswordPostUser = rest.post(
 );
 
 export const successAccountActivation = rest.post(
-	ACTIVATION_ENDPOINT,
+	activationEndpoint,
 	(req, res, ctx) => {
 		track(req);
 
@@ -134,7 +141,7 @@ export const successAccountActivation = rest.post(
 );
 
 export const failureAccountActivation = rest.post(
-	ACTIVATION_ENDPOINT,
+	activationEndpoint,
 	(req, res, ctx) => {
 		track(req);
 
@@ -142,7 +149,7 @@ export const failureAccountActivation = rest.post(
 	}
 );
 
-export const successGeAllUsers = rest.get(USERS_ENDPOINT, (req, res, ctx) => {
+export const successGeAllUsers = rest.get(usersEndpoint, (req, res, ctx) => {
 	const page = req.url.searchParams.get('page'),
 		size = req.url.searchParams.get('size');
 
@@ -164,24 +171,21 @@ export const successGeAllUsers = rest.get(USERS_ENDPOINT, (req, res, ctx) => {
 	return res(ctx.status(200), ctx.json(getPage(page, size)));
 });
 
-export const getUserById = rest.get(
-	`${USERS_ENDPOINT}/:id`,
-	(req, res, ctx) => {
-		const { id } = req.params;
-		const user = users[id - 1],
-			status = user ? 200 : 404,
-			json = user || {
-				message: 'User not found',
-				path: `/api/1.0/users/${id}`,
-				timestamp: 1662676877397,
-			};
+export const getUserById = rest.get(`${usersEndpoint}/:id`, (req, res, ctx) => {
+	const { id } = req.params;
+	const user = users[id - 1],
+		status = user ? 200 : 404,
+		json = user || {
+			message: 'User not found',
+			path: `/api/1.0/users/${id}`,
+			timestamp: 1662676877397,
+		};
 
-		track(req);
-		return res(ctx.status(status), ctx.json(json));
-	}
-);
+	track(req);
+	return res(ctx.status(status), ctx.json(json));
+});
 
-export const loginUser = rest.post(AUTH_ENDPOINT, (req, res, ctx) => {
+export const loginUser = rest.post(authEndpoint, (req, res, ctx) => {
 	const { email } = req.body;
 	const user = users.find((u) => u.email === email),
 		status = user ? 200 : 404,
@@ -198,10 +202,31 @@ export const loginUser = rest.post(AUTH_ENDPOINT, (req, res, ctx) => {
 	return res(ctx.delay(200), ctx.status(status), ctx.json(json));
 });
 
+export const updateUser = rest.put(`${usersEndpoint}/:id`, (req, res, ctx) => {
+	track(req);
+	return res(ctx.delay(200), ctx.status(201), ctx.json('ok'));
+});
+
+export const logoutUser = rest.post(logoutEndpoint, (req, res, ctx) => {
+	track(req);
+	return res(ctx.status(200), ctx.json('ok'));
+});
+
+export const deleteUser = rest.delete(
+	`${usersEndpoint}/:id`,
+	(req, res, ctx) => {
+		track(req);
+		return res(ctx.delay(200), ctx.status(200), ctx.json('ok'));
+	}
+);
+
 export const handlers = [
 	successPostUser,
 	successAccountActivation,
 	successGeAllUsers,
 	getUserById,
 	loginUser,
+	updateUser,
+	logoutUser,
+	deleteUser,
 ];

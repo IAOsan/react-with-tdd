@@ -1,8 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import rootReducer from './root.reducer';
 import * as storageService from '../services/storage.service';
-
-export const STATE_KEY = 'reduxState';
+import { STATE_KEY } from '../config';
 
 export function setupStore(preloadedState) {
 	return configureStore({
@@ -11,9 +10,9 @@ export function setupStore(preloadedState) {
 	});
 }
 
-function createStore() {
+function createStore(initialState) {
 	const persistedState = storageService.getItem(STATE_KEY) || {};
-	const store = setupStore(persistedState);
+	const store = setupStore(initialState || persistedState);
 
 	store.subscribe(() => {
 		storageService.setItem(STATE_KEY, store.getState());

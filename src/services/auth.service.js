@@ -1,14 +1,20 @@
 import { http, handleError } from './http.service';
-
-const endpoint = '/api/1.0/auth';
+import { AUTH_ENDPOINT, LOGOUT_ENDPOINT } from '../config';
 
 export async function login(credentials) {
 	try {
-		const data = await http.post(endpoint, {
+		const res = await http.post(AUTH_ENDPOINT, {
 			body: JSON.stringify(credentials),
 		});
-		// localStorage.setItem('auth', JSON.stringify(data));
-		return data;
+		return res;
+	} catch (error) {
+		handleError(error);
+	}
+}
+
+export async function logout() {
+	try {
+		await http.post(LOGOUT_ENDPOINT);
 	} catch (error) {
 		handleError(error);
 	}

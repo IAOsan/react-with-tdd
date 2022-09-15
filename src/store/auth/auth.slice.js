@@ -10,8 +10,18 @@ const slice = createSlice({
 		error: null,
 	},
 	reducers: {
+		error_added(state, { payload }) {
+			state.error = payload;
+		},
 		error_removed(state) {
 			state.error = null;
+		},
+		user_updated(state, { payload }) {
+			state.user = { ...state.user, ...payload };
+		},
+		logged_out(state) {
+			state.user = null;
+			state.isAuth = false;
 		},
 	},
 	extraReducers: (builder) => {
@@ -37,7 +47,7 @@ const slice = createSlice({
 	},
 });
 
-const { error_removed } = slice.actions;
+const { error_added, error_removed, user_updated, logged_out } = slice.actions;
 export default slice.reducer;
 
 // export const loginWithEmailAndPassword = (credentials) => async (dispatch) => {
@@ -74,3 +84,14 @@ export const loginWithEmailAndPassword = createAsyncThunk(
 );
 
 export const removeError = error_removed();
+
+export const updateUser = (update) => user_updated(update);
+
+export const logout = async (dispatch) => {
+	try {
+		await authService.logout();
+		dispatch(logged_out());
+	} catch (error) {
+		dispatch(error_added);
+	}
+};

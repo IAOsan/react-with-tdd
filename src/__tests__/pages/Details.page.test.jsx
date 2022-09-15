@@ -1,10 +1,10 @@
 import '../setupTestServer';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import { render, screen, waitFor } from '../test-utils';
+import { renderWithProviders, screen, waitFor } from '../test-utils';
 import DetailsPage from '../../pages/Details.page';
 
 function renderPage(entries = ['/user/1']) {
-	render(
+	renderWithProviders(
 		<MemoryRouter initialEntries={entries}>
 			<Routes>
 				<Route path='/user/:id' element={<DetailsPage />} />

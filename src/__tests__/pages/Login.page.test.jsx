@@ -13,7 +13,8 @@ import { requestTracker } from '../testServerHandlers';
 import LoginPage from '../../pages/Login.page';
 import LanguageSelector from '../../components/LanguageSelector.component';
 import * as storageService from '../../services/storage.service';
-import createStore, { STATE_KEY } from '../../store/storeConfig';
+import createStore from '../../store/storeConfig';
+import { STATE_KEY } from '../../config';
 import en from '../../locale/en.json';
 import es from '../../locale/es.json';
 

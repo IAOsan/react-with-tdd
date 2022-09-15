@@ -1,10 +1,9 @@
 import { http, handleError } from './http.service';
-
-const endpoint = '/api/1.0/users';
+import { USERS_ENDPOINT } from '../config';
 
 export async function registerEmailPassword(credentials) {
 	try {
-		const res = await http.post(endpoint, {
+		const res = await http.post(USERS_ENDPOINT, {
 			body: JSON.stringify(credentials),
 		});
 		return res;
@@ -15,7 +14,7 @@ export async function registerEmailPassword(credentials) {
 
 export async function activation(token) {
 	try {
-		await http.post(`${endpoint}/token/${token}`);
+		await http.post(`${USERS_ENDPOINT}/token/${token}`);
 	} catch (error) {
 		handleError(error);
 	}
@@ -23,7 +22,9 @@ export async function activation(token) {
 
 export async function getAllUsers(page = 0, size = 3) {
 	try {
-		const res = await http.get(`${endpoint}?page=${page}&size=${size}`);
+		const res = await http.get(
+			`${USERS_ENDPOINT}?page=${page}&size=${size}`
+		);
 		return res;
 	} catch (error) {
 		handleError(error);
@@ -32,8 +33,28 @@ export async function getAllUsers(page = 0, size = 3) {
 
 export async function getUserById(id) {
 	try {
-		const res = await http.get(`${endpoint}/${id}`);
+		const res = await http.get(`${USERS_ENDPOINT}/${id}`);
 		return res;
+	} catch (error) {
+		handleError(error);
+	}
+}
+
+export async function updateUserById(updatedValue) {
+	try {
+		const { id, ...rest } = updatedValue;
+		const res = await http.put(`${USERS_ENDPOINT}/${id}`, {
+			body: JSON.stringify(rest),
+		});
+		return res;
+	} catch (error) {
+		handleError(error);
+	}
+}
+
+export async function deleteUserById(id) {
+	try {
+		await http.delete(`${USERS_ENDPOINT}/${id}`);
 	} catch (error) {
 		handleError(error);
 	}

@@ -11,5 +11,14 @@
 	"users": "Users",
 	"nextPage": "Next >",
 	"prevPage": "< Prev",
-	"signIn": "Sign in"
+	"signIn": "Sign in",
+	"login": "Login",
+	"myProfile": "My Profile",
+	"logout": "Logout",
+	"edit": "Edit",
+	"deleteMyAccount": "Delete my account",
+	"save": "Save",
+	"cancel": "Cancel",
+	"accountDeletionMessage": "Are you sure to delete your account?",
+	"yes": "Yes"
 }
